@@ -19,7 +19,7 @@ public class Database {
     private Database(){
         Random random = new Random();
         for(int i = 0; i < 10; i++){
-            notes.add(new Note(1, "text content" + i, random.nextInt(3)));
+            notes.add(new Note(notes.size(), "text content" + i, random.nextInt(3)));
         }
     }
 
