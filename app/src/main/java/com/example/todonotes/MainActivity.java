@@ -7,11 +7,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -22,7 +24,6 @@ import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
-    private LinearLayout linearLayoutNotes;
     private RecyclerView notesRecyclerView;
     private FloatingActionButton btnAddNote;
     private Database database = Database.getInstance();
@@ -45,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
         notesAdapter.setOnNoteClickListener(new NotesAdapter.OnNoteClickListener() {
             @Override
             public void onNoteClick(Note note) {
-                database.removeNotes(note.getId());
-                showNotes();
+//                database.removeNotes(note.getId());
+//                showNotes();
             }
         });
         btnAddNote.setOnClickListener(new View.OnClickListener() {
@@ -56,6 +57,24 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
+                0,
+                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                Note note = notesAdapter.getNotes().get(position);
+                database.removeNotes(note.getId());
+                showNotes();
+            }
+        });
+        itemTouchHelper.attachToRecyclerView(notesRecyclerView);
     }
 
     @Override
@@ -66,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initViews(){
         btnAddNote = findViewById(R.id.btnAddNote);
-//        linearLayoutNotes = findViewById(R.id.linearLayoutNotes);
         notesRecyclerView = findViewById(R.id.notesRecyclerView);
     }
 
