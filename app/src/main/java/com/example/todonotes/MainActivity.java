@@ -42,6 +42,13 @@ public class MainActivity extends AppCompatActivity {
         initViews();
         notesAdapter = new NotesAdapter();
         notesRecyclerView.setAdapter(notesAdapter);
+        notesAdapter.setOnNoteClickListener(new NotesAdapter.OnNoteClickListener() {
+            @Override
+            public void onNoteClick(Note note) {
+                database.removeNotes(note.getId());
+                showNotes();
+            }
+        });
         btnAddNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
