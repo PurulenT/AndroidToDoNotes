@@ -26,7 +26,9 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView notesRecyclerView;
     private FloatingActionButton btnAddNote;
-    private Database database = Database.getInstance();
+//    private Database database = Database.getInstance();
+
+    private NoteDatabase noteDatabase;
 
     private NotesAdapter notesAdapter;
 
@@ -70,7 +72,8 @@ public class MainActivity extends AppCompatActivity {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
                 Note note = notesAdapter.getNotes().get(position);
-                database.removeNotes(note.getId());
+//                database.removeNotes(note.getId());
+                noteDatabase.notesDao().remove(note.getId());
                 showNotes();
             }
         });
@@ -86,9 +89,10 @@ public class MainActivity extends AppCompatActivity {
     private void initViews(){
         btnAddNote = findViewById(R.id.btnAddNote);
         notesRecyclerView = findViewById(R.id.notesRecyclerView);
+        noteDatabase = NoteDatabase.getInstance(getApplication());
     }
 
     private void showNotes(){
-        notesAdapter.setNotes(database.getNotes());
+        notesAdapter.setNotes(noteDatabase.notesDao().getNotes());
     }
 }

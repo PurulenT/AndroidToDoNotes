@@ -25,6 +25,7 @@ public class AddNoteActivity extends AppCompatActivity {
     private Database database = Database.getInstance();
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
