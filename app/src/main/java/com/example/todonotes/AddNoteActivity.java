@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,9 +24,8 @@ public class AddNoteActivity extends AppCompatActivity {
     private RadioButton radioButtonMediumPriority;
     private RadioButton radioButtonHighPriority;
     private Button saveNoteButton;
-//    private Database database = Database.getInstance();
     private NoteDatabase noteDatabase;
-
+    private Handler handler = new Handler(Looper.getMainLooper());
 
 
     @Override
@@ -58,12 +59,20 @@ public class AddNoteActivity extends AppCompatActivity {
     private void saveNote(){
         String noteText = editTextNote.getText().toString().trim();
         int priority = getPriority();
-//        int id = database.getNotes().size();
-        int id = 0; //when zero id will be generated
         Note note = new Note(noteText, priority); //pass id with additive constructor
-//        database.addNote(note);
-        noteDatabase.notesDao().add(note);
-        finish(); //заканчивается работа активити после нажатия на кнопку
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                noteDatabase.notesDao().add(note);
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        finish(); //заканчивается работа активити после нажатия на кнопку
+                    }
+                });
+            }
+        });
+        thread.start();
     }
 
     private int getPriority(){
