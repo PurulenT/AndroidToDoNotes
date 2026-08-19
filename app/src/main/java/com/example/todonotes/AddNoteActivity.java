@@ -22,7 +22,8 @@ public class AddNoteActivity extends AppCompatActivity {
     private RadioButton radioButtonMediumPriority;
     private RadioButton radioButtonHighPriority;
     private Button saveNoteButton;
-    private Database database = Database.getInstance();
+//    private Database database = Database.getInstance();
+    private NoteDatabase noteDatabase;
 
 
 
@@ -51,14 +52,17 @@ public class AddNoteActivity extends AppCompatActivity {
         radioButtonMediumPriority = findViewById(R.id.radioButtonMediumPriority);
         radioButtonHighPriority = findViewById(R.id.radioButtonHighPriority);
         saveNoteButton = findViewById(R.id.saveNoteButton);
+        noteDatabase = NoteDatabase.getInstance(getApplication());
     }
 
     private void saveNote(){
         String noteText = editTextNote.getText().toString().trim();
         int priority = getPriority();
-        int id = database.getNotes().size();
-        Note note = new Note(id, noteText, priority);
-        database.addNote(note);
+//        int id = database.getNotes().size();
+        int id = 0; //when zero id will be generated
+        Note note = new Note(noteText, priority); //pass id with additive constructor
+//        database.addNote(note);
+        noteDatabase.notesDao().add(note);
         finish(); //заканчивается работа активити после нажатия на кнопку
     }
 
