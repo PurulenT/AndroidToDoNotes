@@ -4,8 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
 public class AddNoteActivity extends AppCompatActivity {
 
@@ -24,8 +24,7 @@ public class AddNoteActivity extends AppCompatActivity {
     private RadioButton radioButtonMediumPriority;
     private RadioButton radioButtonHighPriority;
     private Button saveNoteButton;
-    private NoteDatabase noteDatabase;
-    private Handler handler = new Handler(Looper.getMainLooper());
+    private AddNoteViewModel viewModel;
 
 
     @Override
@@ -37,6 +36,15 @@ public class AddNoteActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+        viewModel = new ViewModelProvider(this).get(AddNoteViewModel.class);
+        viewModel.getShouldClose().observe(this, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean shouldClose) {
+                if(shouldClose){
+                    finish();
+                }
+            }
         });
         initViews();
         saveNoteButton.setOnClickListener(new View.OnClickListener() {
@@ -53,26 +61,13 @@ public class AddNoteActivity extends AppCompatActivity {
         radioButtonMediumPriority = findViewById(R.id.radioButtonMediumPriority);
         radioButtonHighPriority = findViewById(R.id.radioButtonHighPriority);
         saveNoteButton = findViewById(R.id.saveNoteButton);
-        noteDatabase = NoteDatabase.getInstance(getApplication());
     }
 
     private void saveNote(){
         String noteText = editTextNote.getText().toString().trim();
         int priority = getPriority();
         Note note = new Note(noteText, priority); //pass id with additive constructor
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                noteDatabase.notesDao().add(note);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        finish(); //заканчивается работа активити после нажатия на кнопку
-                    }
-                });
-            }
-        });
-        thread.start();
+        viewModel.saveNote(note);
     }
 
     private int getPriority(){

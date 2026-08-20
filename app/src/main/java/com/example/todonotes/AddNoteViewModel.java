@@ -7,28 +7,27 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import java.util.List;
-
-public class MainViewModel extends AndroidViewModel {
+public class AddNoteViewModel extends AndroidViewModel {
     NoteDatabase noteDatabase;
+    MutableLiveData<Boolean> shouldClose = new MutableLiveData<>(false);
 
-    public MainViewModel(@NonNull Application application) {
+    public AddNoteViewModel(@NonNull Application application) {
         super(application);
         noteDatabase = NoteDatabase.getInstance(application);
     }
 
-    public void removeNote(Note note){
+    public void saveNote(Note note){
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                noteDatabase.notesDao().remove(note.getId());
+                noteDatabase.notesDao().add(note);
+                shouldClose.postValue(true);
             }
         });
         thread.start();
     }
 
-    public LiveData<List<Note>> getNotes(){
-        return noteDatabase.notesDao().getNotes();
+    public LiveData<Boolean> getShouldClose(){
+        return shouldClose;
     }
-
 }
