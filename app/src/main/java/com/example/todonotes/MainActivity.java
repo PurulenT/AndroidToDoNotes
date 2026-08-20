@@ -2,11 +2,7 @@ package com.example.todonotes;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -21,18 +17,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView notesRecyclerView;
     private FloatingActionButton btnAddNote;
-    private NoteDatabase noteDatabase;
     private NotesAdapter notesAdapter;
-//    private Handler handler = new Handler(Looper.getMainLooper());
+    private MainViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,10 +37,11 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        viewModel = new MainViewModel(getApplication());
         initViews();
         notesAdapter = new NotesAdapter();
         notesRecyclerView.setAdapter(notesAdapter);
-        noteDatabase.notesDao().getNotes().observe(this, new Observer<List<Note>>() {
+        viewModel.getNotes().observe(this, new Observer<List<Note>>() {
             @Override
             public void onChanged(List<Note> notes) {
                 notesAdapter.setNotes(notes);
@@ -78,49 +72,14 @@ public class MainActivity extends AppCompatActivity {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
                 Note note = notesAdapter.getNotes().get(position);
-                Thread thread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        noteDatabase.notesDao().remove(note.getId());
-//                        handler.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                showNotes();
-//                            }
-//                        });
-                    }
-                });
-                thread.start();
+                viewModel.removeNote(note);
             }
         });
         itemTouchHelper.attachToRecyclerView(notesRecyclerView);
     }
 
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        showNotes();
-//    }
-
     private void initViews(){
         btnAddNote = findViewById(R.id.btnAddNote);
         notesRecyclerView = findViewById(R.id.notesRecyclerView);
-        noteDatabase = NoteDatabase.getInstance(getApplication());
     }
-
-//    private void showNotes(){
-//        Thread thread = new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                List<Note> notes = noteDatabase.notesDao().getNotes();
-//                handler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        notesAdapter.setNotes(notes); //not working with db on main thread
-//                    }
-//                });
-//            }
-//        });
-//        thread.start();
-//    }
 }
